@@ -85,7 +85,7 @@ if __name__ == '__main__':
     a -= np.mean(a)
     c = np.fft.rfft(a)
     # print(c)
-    t = np.fromfile('/home/zhoulong/Sublime/data/out.pcm', dtype='<i1')[2000:]
+    t = np.fromfile('/home/longzhou/Sublime/data/out.pcm', dtype='<i1')[2000:]
     # c = np.fft.rfft(t[0 : 128])
     # print(c)
     # one = np.array(t[0 : 130], dtype=np.float64)

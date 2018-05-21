@@ -30,7 +30,7 @@ def predict_proba(model, X):
 def data_scale(spectrum):
     label = np.zeros(len(spectrum))
     dump_svmlight_file(spectrum, label, 'data/single.dat', zero_based=False)
-    cmd = ['/home/zhoulong/CodeBlocks/libsvm-3.22/svm-scale', '-r', 'data/scale', 'data/single.dat']
+    cmd = ['/home/longzhou/CodeBlocks/libsvm-3.22/svm-scale', '-r', 'data/scale', 'data/single.dat']
     with open('data/single.scale', 'w') as out:
         subprocess.check_call(cmd, stdout=out)
     return load_svmlight_file('data/single.scale')
@@ -59,9 +59,9 @@ def generate_svmlight_file(folder):
 
 
 if __name__ == '__main__':
-    # folder = '/home/zhoulong/Data/zkhc/2017-12-16/*'
+    # folder = '/home/longzhou/Data/zkhc/2017-12-16/*'
     # generate_svmlight_file(folder)
     # cat *.svm >> out.svm
 
-    X, y = load_svmlight_file('/home/zhoulong/CodeBlocks/libsvm-3.22/tools/out.scale')
+    X, y = load_svmlight_file('/home/longzhou/CodeBlocks/libsvm-3.22/tools/out.scale')
     fit_proba(2.0, 0.125, X, y)

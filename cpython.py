@@ -23,6 +23,9 @@ class Processor:
         self.get_diagnose_time = lib.get_diagnose_time
         self.get_diagnose_time.argtypes = [POINTER(POINTER(c_int)), c_longlong]
         self.get_diagnose_time.restype = POINTER(c_int)
+        self.get_diagnose_zero = lib.get_diagnose_zero
+        self.get_diagnose_zero.argtypes = [POINTER(POINTER(c_int))]
+        self.get_diagnose_zero.restype = POINTER(c_int)
         self.get_diagnose_phase = lib.get_diagnose_phase
         self.get_diagnose_phase.argtypes = [POINTER(c_int), POINTER(c_int)]
         self.get_diagnose_phase.restype = POINTER(c_int)
@@ -41,9 +44,6 @@ class Processor:
         self.next_detail = lib.next_detail
         self.next_detail.argtypes = [c_void_p]
         self.next_detail.restype = c_void_p
-        self.free_detail = lib.free_detail
-        self.free_detail.argtypes = [c_void_p]
-        self.free_detail.restype = None
 
         self.interpolate_foot = lib.interpolate_foot
         self.interpolate_foot.argtypes = [ndpointer(dtype='f4', ndim=1, flags='C_CONTIGUOUS'), ndpointer(dtype='f4', ndim=1, flags='C_CONTIGUOUS')]

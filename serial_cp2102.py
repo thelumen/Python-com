@@ -35,7 +35,7 @@ def send_data():
 
 def send_file():
     ser = serial.Serial('/dev/ttyUSB0', 57600, timeout=10)
-    file = open('/home/zhoulong/Data/chaoyangxiyuan/2017-09-08/1504850902_left.dat', 'rb')
+    file = open('/home/longzhou/Data/chaoyangxiyuan/2017-09-08/1504850902_left.dat', 'rb')
     size = 0
     while True:
         data = file.read(100)

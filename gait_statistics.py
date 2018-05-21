@@ -18,18 +18,65 @@ def by_gender(row, i):
     gender = row[i]
     return 0 if gender == '男' else 1 if gender == '女' else -1
 
-def by_age_gender(row, i, j):
-    age = by_age(row, i)
-    gender = by_gender(row, j)
-    if gender >= 0:
-        return (age << 1) + gender
-    return -1
+def by_status(row, i):
+    status = row[i]
+    return 0 if status == '病人' else 1 if status == '正常人' else -1
 
 def by_name(row):
     return row[0]
 
 def by_archive(row):
     return row[0] + '+' + row[1]
+
+class Classifier_Age_Gender:
+    def __init__(self):
+        self.age = ['<20', '20~39', '40~59', '60~79', '>80', 'unknown']
+        self.gender = ['男', '女', 'unknown']
+
+    def classify(self, row):
+        age = by_age(row, -7)
+        gender = by_gender(row, -5)
+        return self.gender[gender] + self.age[age]
+
+    def classes(self):
+        for age in range(1, 5):
+            for gender in range(0, 2):
+                yield self.gender[gender] + self.age[age]
+
+class Classifier_Age_Gender_Status:
+    def __init__(self):
+        self.age = ['<20', '20~39', '40~59', '60~79', '>80', 'unknown']
+        self.gender = ['男', '女', 'unknown']
+        self.status = [' 病人', ' 正常人', 'unknown']
+
+    def classify(self, row):
+        age = by_age(row, -7)
+        gender = by_gender(row, -5)
+        status = by_status(row, -6)
+        return self.gender[gender] + self.age[age] + self.status[status]
+
+    def classes(self):
+        for age in range(1, 5):
+            for gender in range(0, 2):
+                for status in range(0, 2):
+                    yield self.gender[gender] + self.age[age] + self.status[status]
+
+class Classifier_Ill_Age_Gender:
+    def __init__(self):
+        self.ill = ['跟痛症', '跟腱炎', '前脚掌', '膝关节', '髌腱炎', '骨折不愈合', '腰椎', '臀部', '髋关节痛', 'unknown']
+        self.age = ['<20', '20~39', '40~59', '60~79', '>80', 'unknown']
+        self.gender = ['男', '女', 'unknown']
+
+    def classify(self, row):
+        age = by_age(row, -7)
+        gender = by_gender(row, -5)
+        return self.ill[ill] + self.gender[gender] + self.age[age]
+
+    def classes(self):
+        for ill in range(0, 3):
+            for age in range(1, 5):
+                for gender in range(0, 2):
+                    yield self.ill[ill] + self.gender[gender] + self.age[age]
 
 class Comma:
     def __init__(self):
@@ -49,7 +96,7 @@ class Comma:
         self.cur['time'].append(res)
         self.cur['time_n'].append(n)
 
-    def phase(self, phase):
+    def phase(self):
         analysis = Analysis(self.cur['time'][0], self.cur['space'][0], self.cur['time_n'][0],\
             self.cur['time'][1], self.cur['space'][1], self.cur['time_n'][1])
         if analysis.analysis() >= 0:
@@ -93,9 +140,6 @@ class Comma:
             self.right_start = 0
             self.right_end = 0
         self.writer.writerow([])
-        if phase:
-            # self.writer.writerow(['时相'] + [str(phase[i]) for i in range(0, 6)])
-            process.free_result(phase)
 
     def trajectory(self, res, n, i, foot):
         if i > self.left_start and i < self.left_end if foot == 0 else i > self.right_start and i < self.right_end:
@@ -117,22 +161,26 @@ class Comma:
         pass
 
 class Statistics:
-    def __init__(self, key):
+    def __init__(self, classify, identifier):
         self.sum = {}
-        self.key = key
+        self.classify = classify
+        self.identifier = identifier
+        self.keys = ['stride', 'swing', 'stance', 'swing', 'both', 'cadence', 'velocity', 'angle', 'depression', 'elevation', 'min', 'max']
+        self.names = ['', '步幅', '摆动时间', '支撑时间', '单足时间', '双足时间', '步频', '步速', '足偏角', '离地角度', '着地角度', '摆动最小角度', '摆动最大角度', '年龄']
 
     def open(self, row):
-        i = by_age_gender(row, -7, -5)
+        i = self.classify(row)
         if i in self.sum:
             self.sub = self.sum[i]
         else:
             self.sub = {}
             self.sum[i] = self.sub
-        n = self.key(row)
+        n = self.identifier(row)
         if n in self.sub:
             self.patient = self.sub[n]
         else:
-            self.patient = {'age': row[-7], 'height': row[-4], 'weight': row[-3], 'status': row[-6], 'comment': str(row[-2]) + str(row[-1]), 'stride': [[], []], 'angle': [[], []], 'depression': [[], []], 'elevation': [[], []],\
+            self.patient = {'age': row[-7], 'height': row[-4], 'weight': row[-3], 'status': row[-6],\
+                'comment': str(row[-2]) + str(row[-1]), 'stride': [[], []], 'angle': [[], []], 'depression': [[], []], 'elevation': [[], []],\
                 'swing': [[], []], 'stance': [[], []], 'both': [[], []], 'min': [[], []], 'max': [[], []], 'cadence': [[], []], 'velocity': [[], []]}
             self.sub[n] = self.patient
         h = float(row[-4])
@@ -147,7 +195,10 @@ class Statistics:
         self.cur['time'].append(res)
         self.cur['time_n'].append(n)
 
-    def phase(self, phase):
+    def zero(self, res, n):
+        pass
+
+    def phase(self):
         analysis = Analysis(self.cur['time'][0], self.cur['space'][0], self.cur['time_n'][0],\
             self.cur['time'][1], self.cur['space'][1], self.cur['time_n'][1])
         if analysis.analysis() >= 0:
@@ -211,6 +262,44 @@ class Statistics:
             self.patient['min'][1].extend([x * 180 / math.pi for x in self.cur['min'][1]])
             self.patient['max'][1].extend([x * 180 / math.pi for x in self.cur['max'][1]])
 
+class Plotter:
+    def __init__(self):
+        pass
+
+    def open(self, row):
+        self.cur = {'time': [], 'time_n': [], 'zero': [], 'zero_n': []}
+
+    def space(self, res, n):
+        pass
+
+    def time(self, res, n):
+        self.cur['time'].append(res)
+        self.cur['time_n'].append(n)
+
+    def zero(self, res, n):
+        self.cur['zero'].append(res)
+        self.cur['zero_n'].append(n)
+
+    def phase(self):
+        pass
+
+    def trajectory(self, res, n, i, foot):
+        pass
+
+    def center(self, res, n, i, foot):
+        pass
+
+    def close(self):
+        self.dic = {}
+        n = self.cur['time_n'][0]
+        self.dic['left_time'] = [self.cur['time'][0][i] for i in range(0, n * 4)]
+        n = self.cur['time_n'][1]
+        self.dic['right_time'] = [self.cur['time'][1][i] for i in range(0, n * 4)]
+        n = self.cur['zero_n'][0]
+        self.dic['left_zero'] = [self.cur['zero'][0][i] for i in range(0, n * 2)]
+        n = self.cur['zero_n'][1]
+        self.dic['right_zero'] = [self.cur['zero'][1][i] for i in range(0, n * 2)]
+
 class Walk:
     def __init__(self, handler):
         self.process = Processor()
@@ -223,7 +312,10 @@ class Walk:
         time_size = POINTER(c_int)()
         res = self.process.get_diagnose_time(byref(time_size), delta)
         self.handler.time(res, time_size[0])
-        return space_size, time_size
+        zero_size = POINTER(c_int)()
+        res = self.process.get_diagnose_zero(byref(zero_size))
+        self.handler.zero(res, zero_size[0])
+        return zero_size
 
     def process_detail(self, detail, foot):
         size = POINTER(c_int)()
@@ -233,16 +325,11 @@ class Walk:
             if res:
                 n = size[0] * 6 - 6
                 self.handler.trajectory(res, n, count, foot)
-                detail = self.process.next_detail(detail)
-            else:
-                break
             # res = self.process.detail_center(byref(size), detail)
             # if res:
             #     n = size[0]
             #     self.handler.center(res, n, count, foot)
-            #     detail = self.process.next_detail(detail)
-            # else:
-            #     break
+            detail = self.process.next_detail(detail)
             count += 1
 
     def process_file(self, d, row):
@@ -256,7 +343,7 @@ class Walk:
         for i in range(504, len(da), 508):
             self.process.get_data_result(da[i - 500 : i])
         self.process.get_fake_data_result()
-        left_space, left_time = self.process_result(c_longlong(row[2]))
+        left_zero = self.process_result(c_longlong(row[2]))
         left_detail = self.process.get_detail()
         # right
         calib = re.split(r',|\.', row[4])
@@ -266,27 +353,19 @@ class Walk:
         for i in range(504, len(da), 508):
             self.process.get_data_result(da[i - 500 : i])
         self.process.get_fake_data_result()
-        right_space, right_time = self.process_result(c_longlong(0))
+        right_zero = self.process_result(c_longlong(0))
         right_detail = self.process.get_detail()
-        # phase
-        phase = self.process.get_diagnose_phase(left_time, right_time)
-        self.handler.phase(phase)
-        if phase:
-            self.process.free_result(phase)
+        self.handler.phase()
         # detail
         self.process_detail(left_detail, 0)
         self.process_detail(right_detail, 1)
         self.handler.close()
-        self.process.free_result(left_space)
-        self.process.free_result(left_time)
-        self.process.free_detail(left_detail)
-        self.process.free_result(right_space)
-        self.process.free_result(right_time)
-        self.process.free_detail(right_detail)
+        self.process.free_result(left_zero)
+        self.process.free_result(right_zero)
 
 if __name__ == '__main__':
     handler = Statistics(by_name)
     walk = Walk(handler)
-    walk.process_file('/home/zhoulong/Data/chaoyangxiyuan/2018-03-20_2',\
+    walk.process_file('/home/longzhou/Data/chaoyangxiyuan/2018-03-20_2',\
         ['苗树长', '1521523578', 20535153, '40,0,59,4088,4090,4073.-15,32,4', '-65,-66,20,4095,4093,4067.23,31,11',\
         '66', '正常人', '男', '173', '75', '', '18211171079'])

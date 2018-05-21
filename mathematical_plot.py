@@ -10,7 +10,7 @@ from ctypes import *
 import re
 import sys
 
-from cpython import Proccessor
+from cpython import Processor
 from gait_analysis import Analysis
 
 proccess = None
@@ -241,9 +241,9 @@ def process_file(di, dat):
     conn.close()
 
 if __name__ == '__main__':
-    proccess = Proccessor()
+    proccess = Processor()
     if len(sys.argv) == 5:
         process_data('img', sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     else:
-        process_file('/home/zhoulong/Data/chaoyangdongyuan/2017-12-29_1', '1514254964')
-        # process_file('/home/zhoulong/Data/chaoyangdongyuan/2017-11-03', '1509693530')
+        process_file('/home/longzhou/Data/chaoyangdongyuan/2017-12-29_1', '1514254964')
+        # process_file('/home/longzhou/Data/chaoyangdongyuan/2017-11-03', '1509693530')

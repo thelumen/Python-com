@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 def remove_audio():
-    inf = open("/home/zhoulong/Sublime/data/out.dat", "rb")
+    inf = open("/home/longzhou/Sublime/data/out.dat", "rb")
     outf = open("data/out_right.dat", "wb")
     while True:
         da = inf.read(508)
@@ -15,7 +15,7 @@ def remove_audio():
 
 
 def data_seprate():
-    f = open('/home/zhoulong/Data/chaoyangxiyuan/2017-12-26/1514266857_right.dat', 'rb')
+    f = open('/home/longzhou/Data/chaoyangxiyuan/2017-12-26/1514266857_right.dat', 'rb')
     out = [open('data/out.pcm', 'wb'), open('data/out.prs', 'wb'), open('data/out.imu', 'wb')]
     mode = 0
     limit = [8, 408, 448, 508]

@@ -221,7 +221,6 @@ class Analysis:
             return (1, 1, 1, 1, 1)
         other_both = np.mean(self.other_both)
         delta_heel = np.mean(self.one_heel) - other_both
-        print(delta_heel)
         return (np.mean(self.one_both), np.mean(self.other_swing) - delta_heel, delta_heel, other_both, np.mean(self.one_swing))
 
     def cadence(self):
